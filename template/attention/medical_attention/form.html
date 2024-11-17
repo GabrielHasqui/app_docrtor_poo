@@ -273,7 +273,6 @@
             let nombre=det.medicamento__nombre
             let cantidad= det.cantidad
             let prescripcion=det.prescripcion
-            print( codigo, nombre, cantidad, prescripcion)
             this.medicamentos.push({ codigo, nombre, cantidad, prescripcion });
             });
             this.syncTable();
@@ -387,7 +386,6 @@
         //let url = (detailAtencionUpdate && detailAtencionUpdate.length > 0) ? '/attention_update/' : '/attention_create/'
         let url = window.location.pathname.trim()
         //url = url.slice(0, -1);
-        alert(url)
         fetch(url, {
             method: 'POST',
             headers: {
@@ -400,7 +398,7 @@
         .then(data => {
             //console.log(data)
             alert(data.msg);
-             window.location.href = '/attention_list/'
+                window.location.href = '/attention/attention_list/';
         })
         .catch(error => {
             console.error('Error al guardar la atención médica:', error);

@@ -7,25 +7,7 @@ from aplication.core.models import Paciente
 # Definición de la clase PatientForm que hereda de ModelForm
 class AttentionForm(ModelForm):
         # Clase interna Meta para configurar el formulario
-    class Meta:    
-        # campos que se muestran en este mismo orden en el formulario como etiquetas html
-        # fields = [  "paciente",
-        #             "fecha_atencion",
-        #             "presion_arterial",
-        #             "pulso",
-        #             "temperatura",
-        #             "frecuencia_respiratoria",
-        #             "saturacion_oxigeno",
-        #             "peso",
-        #             "altura",
-        #             "motivo_consulta",
-        #             "sintomas",
-        #             "tratamiento",
-        #             "diagnostico",
-        #             "examen_fisico",
-        #             "examenes_enviados",
-        #             "comentario_adicional"
-        #          ]
+    class Meta:
         model = Atencion
         fields = '__all__'
         exclude = ['fecha_atencion']  # Se excluye porque es auto_now_add

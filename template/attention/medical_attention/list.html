@@ -71,9 +71,6 @@
                                             <a href="{% url 'attention:attention_update' item.id %}" class="btn btn-success btn-sm text-white" title="Editar Atencion">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            {% with id=item.id name=item.nombre_completo msg="Esta seguro de eliminar al paciente:" %}
-                                             <button class="btn btn-danger" title="Eliminar Atencion" onclick="confirmDelete('{{ id }}','{{name}}','{{ msg|escapejs }}');"> <i class="fa-solid fa-trash"></i></button>
-                                            {% endwith %}
                                         </div>
                                     </td>
                                 </tr>
@@ -137,7 +134,7 @@
     function verDatos(id) {
     //   
     // Obtener los datos de la atencion del paciente
-      fetch(`/attention_detail/${id}/`)
+      fetch(`/attention/attention_detail/${id}/`)
         .then(response => response.json())
         .then(data => {
             // Llenar el modal con los datos

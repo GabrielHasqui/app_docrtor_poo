@@ -68,11 +68,11 @@ class AttentionCreateView(LoginRequiredMixin,CreateViewMixin, CreateView):
                     paciente_id=int(data['paciente']),
                     presion_arterial=data['presionArterial'],
                     pulso=int(data['pulso']),
-                    temperatura=Decimal(data['temperatura']),
+                    temperatura=float(data['temperatura']),
                     frecuencia_respiratoria=int(data['frecuenciaRespiratoria']),
-                    saturacion_oxigeno=Decimal(data['saturacionOxigeno']),
-                    peso=Decimal(data['peso']),
-                    altura=Decimal(data['altura']),
+                    saturacion_oxigeno=float(data['saturacionOxigeno']),
+                    peso=float(data['peso']),
+                    altura=float(data['altura']),
                     motivo_consulta=data['motivoConsulta'],
                     sintomas=data['sintomas'],
                     tratamiento=data['tratamiento'],
@@ -83,6 +83,7 @@ class AttentionCreateView(LoginRequiredMixin,CreateViewMixin, CreateView):
                 )
                 diagnostico_ids = data.get('diagnostico', [])
                 diagnosticos = Diagnostico.objects.filter(id__in=diagnostico_ids)
+                print("diag=",diagnosticos)
                 atencion.diagnostico.set(diagnosticos)
                 atencion.save()
                 # Ahora procesamos el arreglo de medicamentos
@@ -102,6 +103,7 @@ class AttentionCreateView(LoginRequiredMixin,CreateViewMixin, CreateView):
                 return JsonResponse({"msg": "Éxito al registrar la atención médica."}, status=200)
 
         except Exception as ex:
+            print("error=",ex)
             messages.error(self.request, f"Érro al registrar la atención médica")
             return JsonResponse({"msg": str(ex)}, status=400)
         
