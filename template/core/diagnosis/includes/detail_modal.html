@@ -1,0 +1,35 @@
+<!-- templates/core/diagnosis/includes/detail_modal.html -->
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/fontawesome.min.css' %}">
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<div class="modal fade" id="diagnosticoModal" tabindex="-1" aria-labelledby="diagnosticoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> <!-- Cambiado a modal-lg para más espacio -->
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white fw-bold" id="diagnosticoModalLabel">
+                    <i class="fas fa-tint me-2"></i>Detalles del Diagnóstico
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="card border-0 bg-light shadow-sm p-3">
+                            <p class="mb-2"><strong><i class="fas fa-id-card me-2 text-primary"></i>ID:</strong> <span id="diagnostico-id"></span></p>
+                            <p class="mb-2"><strong><i class="fas fa-tint me-2 text-primary"></i>Código:</strong> <span id="diagnostico-codigo"></span></p>
+                            <p class="mb-2"><strong><i class="fas fa-info-circle me-2 text-primary"></i>Descripción:</strong> <span id="diagnostico-descripcion"></span></p>
+                            <p class="mb-0"><strong><i class="fas fa-info-circle me-2 text-primary"></i>Datos Adicionales:</strong> <span id="diagnostico-datos_adicionales"></span></p>
+                            <p class="mb-0"><strong><i class="fas fa-check me-2 text-primary"></i>Activo:</strong> <span id="diagnostico-activo"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

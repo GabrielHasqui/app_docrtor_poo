@@ -1,0 +1,112 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href={% static 'css/form.css' %}>
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 col-lg-12 px-md-4 main-content">
+            <!-- Mensajes de error del formulario -->
+            {% include 'includes/message_error_form.html' %}
+            
+            <!-- Formulario de medicamento -->
+            <form method="post" enctype="multipart/form-data" class="py-4">
+                {% csrf_token %}
+                <div class="card shadow p-4">
+                    <h3 class="text-primary-emphasis mb-4 fw-bold">{{ title1 }}</h3>
+                    
+                    <div class="row g-0">
+                        <!-- Sección de foto -->
+                        <div class="col-lg-4 flex flex-col items-center">
+                            <div id="imagenPreview" class="mb-4 flex justify-center">
+                                {% if form.imagen.value %}
+                                    <img id="imagenSeleccionada" 
+                                         src="{{ form.imagen.value.url }}" 
+                                         class="shadow-lg rounded-xl object-cover border-4 border-gray-200 hover:border-blue-500 transition-all" 
+                                         alt="Imagen del medicamento" 
+                                         style="width: 300px; height: 300px;">
+                                {% else %}
+                                    <img id="imagenSeleccionada" 
+                                         src="{% static 'img/empty.png' %}" 
+                                         class="shadow-lg rounded-xl object-cover border-4 border-gray-200 hover:border-blue-500 transition-all" 
+                                         alt="Imagen por defecto" 
+                                         style="width: 300px; height: 300px;">
+                                {% endif %}
+                            </div>
+                            <div class="text-center w-full px-4">
+                                <label for="{{ form.imagen.id_for_label }}" class="form-label font-bold text-gray-700 mb-2 block">
+                                    {{ form.imagen.label }}
+                                </label>
+                                {{ form.imagen }}
+                            </div>
+                        </div>
+
+                        <!-- Sección de datos del medicamento -->
+                        <div class="col-lg-8 px-2">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.tipo.id_for_label }}" class="form-label fw-bold">{{ form.tipo.label }}</label>
+                                    {{ form.tipo }}
+                                    {{ form.tipo.errors }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.marca_medicamento.id_for_label }}" class="form-label fw-bold">{{ form.marca_medicamento.label }}</label>
+                                    {{ form.marca_medicamento }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label fw-bold">{{ form.nombre.label }}</label>
+                                    {{ form.nombre }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">{{ form.descripcion.label }}</label>
+                                    {{ form.descripcion }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.concentracion.id_for_label }}" class="form-label fw-bold">{{ form.concentracion.label }}</label>
+                                    {{ form.concentracion }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.cantidad.id_for_label }}" class="form-label fw-bold">{{ form.cantidad.label }}</label>
+                                    {{ form.cantidad }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.precio.id_for_label }}" class="form-label fw-bold">{{ form.precio.label }}</label>
+                                    {{ form.precio }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.comercial.id_for_label }}" class="form-label fw-bold">{{ form.comercial.label }}</label>
+                                    {{ form.comercial }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.activo.id_for_label }}" class="form-label fw-bold">{{ form.activo.label }}</label>
+                                    {{ form.activo }}
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-outline-success me-2" type="submit">Registrar</button>
+                                <a class="btn btn-outline-warning" href="{% url 'core:medicine_list' %}">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("id_imagen").onchange = function(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("imagenSeleccionada").src = e.target.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "components/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-md-12 col-lg-12 px-md-4 main-content">
+            <!-- Medicine List Content -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <!-- Title -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="card-title mb-0 text-primary-emphasis fw-bold">{{ title1 }}</h3>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between g-3 mb-4">
+                        <form method="GET" action="{% url 'core:medicine_list' %}" class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
+                            <div class="col-md-6">
+                                <input type="text" name="q" class="form-control search-box" value="{{ request.GET.q }}" placeholder="Buscar medicamento...">
+                            </div>
+                        </form>
+                        <a class="btn btn-primary fw-bold mt-3 mt-md-0" href="{% url 'core:medicine_create' %}">
+                            <i class="fas fa-plus me-2"></i>Nuevo Medicamento
+                        </a>
+                    </div>
+
+                    <!-- Medicine Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Medicamento</th>
+                                    <th>Descripción</th>
+                                    <th>Concentración</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>Comercial</th>
+                                    <th>Activo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in medicamentos %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ item.imagen.url }}" class="rounded-circle me-3" width="30px">
+                                            <div>
+                                                <div class="fw-bold">{{ item.nombre }}</div>
+                                                <small class="text-muted">{{ item.id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.descripcion|truncatechars:50 }}</td>
+                                    <td>{{ item.concentracion }}</td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>{{ item.precio }}</td>
+                                    <td>{% if item.comercial %}Sí{% else %}No{% endif %}</td>
+                                    <td>
+                                        <span class="medicine-status {% if item.activo %}status-active{% else %}status-inactive{% endif %}"></span>
+                                        {% if item.activo %}Activo{% else %}Inactivo{% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons d-flex gap-2">
+                                            <button class="btn btn-primary btn-sm" title="Detalle Medicamento" onclick="verMedicamento('{{ item.id }}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <a href="{% url 'core:medicine_update' item.id %}" class="btn btn-success btn-sm text-white" title="Editar Medicamento">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% with id=item.id name=item.nombre msg="Esta seguro de eliminar el medicamento:" %}
+                                            <button class="btn btn-danger btn-sm" title="Eliminar Medicamento" onclick="confirmDelete('{{ id }}', '{{ name }}', '{{ msg|escapejs }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% endwith %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav class="d-flex justify-content-between align-items-center mt-4">
+                        <p class="text-muted mb-0">{{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} medicamentos</p>
+                        <ul class="pagination mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1"><i class="fas fa-chevron-left"></i></a>
+                            </li>
+                            {% endif %}
+                            {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item{% if num == page_obj.number %} active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal includes -->
+{% include 'includes/confirm_delete_modal.html' %}
+{% include 'core/medicine/includes/detail_modal.html' %}
+{% endblock %}
+
+{% block js %}
+<script>
+    // Modal delete functions
+    function confirmDelete(id, name, msg) {
+        document.getElementById('modalMessage').innerText = `${msg} ${name}`;
+        const form = document.getElementById('deleteForm');
+        form.action = `/medicine_delete/${id}/`;
+        const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        modal.show();
+    }
+
+    function closeModal() {
+        const modalElement = document.getElementById('confirmDeleteModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) modalInstance.hide();
+    }
+
+    // Modal detail functions
+    function verMedicamento(id) {
+        fetch(`/medicine_detail/${id}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('medicamento-id').textContent = data.id;
+                document.getElementById('medicamento-nombre').textContent = data.nombre;
+                document.getElementById('medicamento-descripcion').textContent = data.descripcion;
+                document.getElementById('medicamento-concentracion').textContent = data.concentracion;
+                document.getElementById('medicamento-cantidad').textContent = data.cantidad;
+                document.getElementById('medicamento-precio').textContent = data.precio;
+                document.getElementById('medicamento-comercial').textContent = data.comercial ? 'Sí' : 'No';
+                document.getElementById('medicamento-activo').textContent = data.activo ? 'Activo' : 'Inactivo';
+                document.getElementById('medicamento-imagen').src = data.imagen;
+                document.getElementById('medicamento-tipo').textContent = data.tipo;
+                document.getElementById('medicamento-marca').textContent = data.marca_medicamento;
+
+                const modal = new bootstrap.Modal(document.getElementById('medicamentoModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cargar los datos del medicamento');
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "components/base.html" %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-12 col-lg-12 px-md-4 main-content">
+                <!-- Schedule Attention List Content -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title mb-0">Listado de Horarios de Atención</h5>
+                        </div>
+        
+                        <!-- Search and Filter -->
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between g-3 mb-4">
+                            <form method="GET" action="{% url 'attention:schedule_attention_list' %}" class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
+                                <div class="col-md-20">
+                                    <input type="text" name="q" class="form-control search-box" value="{{ request.GET.q }}" placeholder="Buscar horario de atención...">
+                                </div>
+                            </form>
+                            <a class="btn btn-primary mt-3 mt-md-0" href="{% url 'attention:schedule_attention_create' %}">
+                                <i class="fas fa-plus me-2"></i>Nuevo Horario de Atención
+                            </a>
+                        </div>
+        
+                        <!-- Attention Hours Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Día de la Semana</th>
+                                        <th>Hora de Inicio</th>
+                                        <th>Hora de Fin</th>
+                                        <th>Intervalo Desde</th>
+                                        <th>Intervalo Hasta</th>
+                                        <th>Activo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in schedule_attentions %}
+                                        <tr>
+                                            <td>{{ item.dia_semana }}</td>
+                                            <td>{{ item.hora_inicio }}</td>
+                                            <td>{{ item.hora_fin }}</td>
+                                            <td>{{ item.intervalo_desde }}</td>
+                                            <td>{{ item.intervalo_hasta }}</td>
+                                            <td>
+                                                <span class="patient-status {% if item.activo %}status-active{% else %}status-inactive{% endif %}"></span>
+                                                {% if item.activo %}Activo{% else %}Inactivo{% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons d-flex gap-2">
+                                                    <button class="btn btn-info btn-sm" title="Detalle Horario de Atención" onclick="verHorarioAtencion('{{ item.id }}')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <a href="{% url 'attention:schedule_attention_update' item.id %}" class="btn btn-info btn-sm text-white" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-danger" onclick="confirmDelete('{{ item.id }}', '{{ item.dia_semana }}', 'Está seguro de eliminar este horario de atención:');">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+        
+                        <!-- Pagination -->
+                        <nav class="d-flex justify-content-between align-items-center mt-4">
+                            <p class="text-muted mb-0">{{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} horarios de atención</p>
+                            <ul class="pagination mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1"><i class="fas fa-chevron-left"></i></a>
+                                    </li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+        
+                <!-- Include Delete Confirmation Modal -->
+                {% include 'includes/confirm_delete_modal.html' %}
+        
+                <!-- Horario de Atención Modal -->
+                {% include 'attention/schedule_attention/includes/detail_modal.html' %}
+        
+        
+                <script>
+                    function confirmDelete(id, name, msg) {
+                        document.getElementById('modalMessage').innerText = `${msg} ${name}`;
+                        const form = document.getElementById('deleteForm');
+                        form.action = `/attention/schedule_attention_delete/${id}/`;
+                        const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                        modal.show();
+                    }
+        
+                    function closeModal() {
+                        const modalElement = document.getElementById('confirmDeleteModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    }
+        
+                    function verHorarioAtencion(id) {
+                        fetch(`/attention/schedule_attention_detail/${id}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('horario_atencion-id').textContent = data.id;
+                                document.getElementById('horario_atencion-dia_semana').textContent = data.dia_semana;
+                                document.getElementById('horario_atencion-hora_inicio').textContent = data.hora_inicio;
+                                document.getElementById('horario_atencion-hora_fin').textContent = data.hora_fin;
+                                document.getElementById('horario_atencion-intervalo_desde').textContent = data.intervalo_desde;
+                                document.getElementById('horario_atencion-intervalo_hasta').textContent = data.intervalo_hasta;
+                                document.getElementById('horario_atencion-activo').textContent = data.activo ? 'Sí' : 'No';
+                                const modal = new bootstrap.Modal(document.getElementById('horario_atencion_Modal'));
+                                modal.show();
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Ocurrió un error al cargar los datos del horario de atención');
+                            });
+                    }
+                </script>
+        
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+            </body>
+        </html>
+        {% endblock %}

@@ -1,0 +1,210 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href={% static 'css/form.css' %}>
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 col-lg-12 px-md-4 main-content">
+            <!-- Mensajes de error del formulario -->
+            {% include 'includes/message_error_form.html' %}
+            
+            <!-- Formulario de empleado -->
+            <form method="post" enctype="multipart/form-data" class="py-4">
+                {% csrf_token %}
+                <div class="card shadow p-4">
+                    <h3 class="text-primary-emphasis mb-4 fw-bold">{{ grabar }}</h3>
+                    
+                    <div class="row g-0">
+                        <!-- Sección de foto -->
+                        <div class="col-lg-4 flex flex-col items-center">
+                            <div id="imagenPreview" class="mb-4 flex justify-center">
+                                {% if form.foto.value %}
+                                    <img id="imagenSeleccionada" 
+                                         src="{{ form.foto.value.url }}" 
+                                         class="shadow-lg rounded-xl object-cover border-4 border-gray-200 hover:border-blue-500 transition-all" 
+                                         alt="Foto del empleado" 
+                                         style="width: 300px; height: 300px;">
+                                {% else %}
+                                    <img id="imagenSeleccionada" 
+                                         src="{% static 'img/empty.png' %}" 
+                                         class="shadow-lg rounded-xl object-cover border-4 border-gray-200 hover:border-blue-500 transition-all" 
+                                         alt="Foto por defecto" 
+                                         style="width: 300px; height: 300px;">
+                                {% endif %}
+                            </div>
+                            <div class="text-center w-full px-4">
+                                <label for="{{ form.foto.id_for_label }}" class="form-label font-bold text-gray-700 mb-2 block">
+                                    {{ form.foto.label }}
+                                </label>
+                                {{ form.foto }}
+                            </div>
+                        </div>
+
+                        <!-- Sección de datos personales -->
+                        <div class="col-lg-8 px-2">
+                            <div class="row">
+                                <!-- Datos de identificación -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.cedula.id_for_label }}" class="form-label fw-bold">{{ form.cedula.label }}</label>
+                                    {{ form.cedula }}
+                                    {{ form.cedula.errors }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.nombres.id_for_label }}" class="form-label fw-bold">{{ form.nombres.label }}</label>
+                                    {{ form.nombres }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.apellidos.id_for_label }}" class="form-label fw-bold">{{ form.apellidos.label }}</label>
+                                    {{ form.apellidos }}
+                                </div>
+
+                                <!-- Datos personales -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label fw-bold">{{ form.fecha_nacimiento.label }}</label>
+                                    {{ form.fecha_nacimiento }}
+                                    {{ form.fecha_nacimiento.errors }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.cargo.id_for_label }}" class="form-label fw-bold">{{ form.cargo.label }}</label>
+                                    {{ form.cargo }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.sueldo.id_for_label }}" class="form-label fw-bold">{{ form.sueldo.label }}</label>
+                                    {{ form.sueldo }}
+                                </div>
+
+                                <!-- Sección de ubicación -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.direccion.id_for_label }}" class="form-label fw-bold">{{ form.direccion.label }}</label>
+                                    {{ form.direccion }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.latitud.id_for_label }}" class="form-label fw-bold">{{ form.latitud.label }}</label>
+                                    {{ form.latitud }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.longitud.id_for_label }}" class="form-label fw-bold">{{ form.longitud.label }}</label>
+                                    {{ form.longitud }}
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#mapModal">
+                                        Seleccionar ubicación en el mapa
+                                    </button>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.activo.id_for_label }}" class="form-label fw-bold">{{ form.activo.label }}</label>
+                                    {{ form.activo }}
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-outline-success me-2" type="submit">{{ grabar }}</button>
+                                <a class="btn btn-outline-warning" href="{{ back_url }}">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% include 'core/employee/includes/map_modal.html' %}
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCXV8ZfOySWCx0J73_fOosj8buoMleBqR4&callback=initMap&libraries=places" async defer></script>
+<script>
+    let map, marker, geocoder, autocomplete;
+
+    function initMap() {
+        const initialLocation = { lat: -2.170998, lng: -79.922359 };
+        const latInput = document.getElementById('{{ form.latitud.id_for_label }}');
+        const lngInput = document.getElementById('{{ form.longitud.id_for_label }}');
+        const addressInput = document.getElementById('{{ form.direccion.id_for_label }}');
+
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: initialLocation,
+            zoom: 13,
+        });
+
+        marker = new google.maps.Marker({
+            position: initialLocation,
+            map: map,
+            draggable: true,
+        });
+
+        geocoder = new google.maps.Geocoder();
+        autocomplete = new google.maps.places.Autocomplete(document.getElementById("addressInput"));
+        autocomplete.bindTo("bounds", map);
+
+        autocomplete.addListener("place_changed", function () {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) {
+                alert("La ubicación ingresada no es válida.");
+                return;
+            }
+
+            map.setCenter(place.geometry.location);
+            marker.setPosition(place.geometry.location);
+            latInput.value = place.geometry.location.lat().toFixed(5);
+            lngInput.value = place.geometry.location.lng().toFixed(5);
+            addressInput.value = place.formatted_address;
+        });
+
+        google.maps.event.addListener(marker, "dragend", function () {
+            const position = marker.getPosition();
+            latInput.value = position.lat().toFixed(5);
+            lngInput.value = position.lng().toFixed(5);
+            geocodePosition(position);
+        });
+    }
+
+    function geocodePosition(position) {
+        geocoder.geocode({ location: position }, function (results, status) {
+            if (status === google.maps.GeocoderStatus.OK) {
+                const addressInput = document.getElementById('{{ form.direccion.id_for_label }}');
+                if (results[0]) {
+                    addressInput.value = results[0].formatted_address;
+                }
+            }
+        });
+    }
+
+    function saveLocation() {
+        const latInput = document.getElementById('{{ form.latitud.id_for_label }}');
+        const lngInput = document.getElementById('{{ form.longitud.id_for_label }}');
+        const addressInput = document.getElementById('{{ form.direccion.id_for_label }}');
+
+        if (!latInput.value || !lngInput.value || !addressInput.value) {
+            alert("Selecciona una ubicación en el mapa.");
+            return;
+        }
+        
+        const mapModal = document.getElementById("mapModal");
+        const bootstrapModal = bootstrap.Modal.getInstance(mapModal);
+        if (bootstrapModal) {
+            bootstrapModal.hide();
+        }
+
+        setTimeout(() => {
+            document.body.classList.remove('modal-open');
+            document.querySelector('.modal-backdrop').remove();
+        }, 500);
+    }
+</script>
+<script>
+    document.getElementById("id_foto").onchange = function(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("imagenSeleccionada").src = e.target.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    };
+</script>
+{% endblock %}

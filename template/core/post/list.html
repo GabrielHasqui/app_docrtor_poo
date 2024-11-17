@@ -1,0 +1,128 @@
+{% extends "components/base.html" %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-md-12 col-lg-12 px-md-4 main-content">
+                <!-- Cargo List Content -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="card-title mb-0 text-primary-emphasis fw-bold">Lista de Cargos</h3>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between g-3 mb-4">
+                            <form method="GET" action="{% url 'core:post_list' %}" class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
+                                <div class="col-md-20">
+                                    <input type="text" name="q" class="form-control search-box" value="{{ request.GET.q }}" placeholder="Buscar cargo...">
+                                </div>
+                            </form>
+                            <a class="btn btn-primary fw-bold mt-3 mt-md-0" href="{% url 'core:post_create' %}">
+                                <i class="fas fa-plus me-2"></i>Nuevo Cargo
+                            </a>
+                        </div>
+
+                        <!-- Cargo Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cargo in cargos %}
+                                        <tr>
+                                            <td>{{ cargo.nombre|capfirst }}</td>
+                                            <td>{{ cargo.descripcion|truncatewords:10 }}</td>
+                                            <td>{{ cargo.activo|yesno:"Activo,Inactivo" }}</td>
+                                            <td>
+                                                <div class="action-buttons d-flex gap-2">
+                                                    <button class="btn btn-primary btn-sm" title="Detalle Cargo" onclick="verCargo('{{ cargo.id }}')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <a href="{% url 'core:post_update' cargo.id %}" class="btn btn-success btn-sm text-white" title="Editar Cargo">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    {% with id=cargo.id nombre=cargo.nombre msg="Esta seguro de eliminar el cargo:" %}
+                                                        <button class="btn btn-danger" title="Eliminar Cargo" onclick="confirmDelete('{{ id }}','{{ nombre }}','{{ msg|escapejs }}');">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    {% endwith %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav class="d-flex justify-content-between align-items-center mt-4">
+                            <p class="text-muted mb-0">{{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} cargos</p>
+                            <ul class="pagination mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1"><i class="fas fa-chevron-left"></i></a>
+                                    </li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'includes/confirm_delete_modal.html' %}
+    {% include 'core/post/includes/detail_modal.html' %}
+{% endblock %}
+
+{% block js %}
+    <script>
+        function confirmDelete(id, nombre, msg) {
+            document.getElementById('modalMessage').innerText = `${msg} ${nombre}`;
+            const form = document.getElementById('deleteForm');
+            form.action = `/post_delete/${id}/`;
+            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            modal.show();
+        }
+
+        function closeModal() {
+            const modalElement = document.getElementById('confirmDeleteModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+
+        function verCargo(id) {
+            fetch(`/post_detail/${id}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cargo-id').textContent = data.id;
+                    document.getElementById('cargo-nombre').textContent = data.nombre;
+                    document.getElementById('cargo-descripcion').textContent = data.descripcion;
+                    document.getElementById('cargo-activo').textContent = data.activo ? 'Activo' : 'Inactivo';
+
+                    const modal = new bootstrap.Modal(document.getElementById('cargoModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al cargar los datos del cargo');
+                });
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!-- templates/core/brand_medicine/includes/detail_modal.html -->
+<div class="modal fade" id="marcaMedicamentoModal" tabindex="-1" aria-labelledby="marcaMedicamentoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> <!-- Cambiado a modal-lg para más espacio -->
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white fw-bold" id="marcaMedicamentoModalLabel">
+                    <i class="fas fa-pills me-2"></i>Detalles de la Marca de Medicamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="card border-0 bg-light shadow-sm p-3">
+                            <p class="mb-2"><strong><i class="fas fa-id-card me-2 text-primary"></i>ID:</strong> <span id="marca-id"></span></p>
+                            <p class="mb-2"><strong><i class="fas fa-pills me-2 text-primary"></i>Nombre:</strong> <span id="marca-nombre"></span></p>
+                            <p class="mb-2"><strong><i class="fas fa-info-circle me-2 text-primary"></i>Descripción:</strong> <span id="marca-descripcion"></span></p>
+                            <p class="mb-0"><strong><i class="fas fa-check-circle me-2 text-primary"></i>Activo:</strong> <span id="marca-activo"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

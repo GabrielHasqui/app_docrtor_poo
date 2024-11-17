@@ -1,0 +1,54 @@
+<div class="modal fade" id="medicamentoModal" tabindex="-1" aria-labelledby="medicamentoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white fw-bold" id="medicamentoModalLabel">
+                    <i class="fas fa-pills me-2"></i>Detalles del Medicamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <div class="position-relative">
+                            <img id="medicamento-imagen" src="" alt="Imagen del medicamento" 
+                                 class="img-fluid rounded border border-3 border-primary shadow" 
+                                 style="height: 200px; width: 200px; object-fit: cover;">
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light shadow-sm p-3">
+                                    <p class="mb-2"><strong><i class="fas fa-id-card me-2 text-primary"></i>ID:</strong> <span id="medicamento-id"></span></p>
+                                    <p class="mb-2"><strong><i class="fas fa-pills me-2 text-primary"></i>Nombre:</strong> <span id="medicamento-nombre"></span></p>
+                                    <p class="mb-2"><strong><i class="fas fa-info-circle me-2 text-primary"></i>Descripción:</strong> <span id="medicamento-descripcion"></span></p>
+                                    <p class="mb-0"><strong><i class="fas fa-flask me-2 text-primary"></i>Concentración:</strong> <span id="medicamento-concentracion"></span></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light shadow-sm p-3">
+                                    <p class="mb-2"><strong><i class="fas fa-cubes me-2 text-primary"></i>Cantidad:</strong> <span id="medicamento-cantidad"></span></p>
+                                    <p class="mb-2"><strong><i class="fas fa-dollar-sign me-2 text-primary"></i>Precio:</strong> <span id="medicamento-precio"></span></p>
+                                    <p class="mb-2"><strong><i class="fas fa-tags me-2 text-primary"></i>Comercial:</strong> <span id="medicamento-comercial"></span></p>
+                                    <p class="mb-0"><strong><i class="fas fa-check me-2 text-primary"></i>Activo:</strong> <span id="medicamento-activo"></span></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light shadow-sm p-3">
+                                    <p class="mb-2"><strong><i class="fas fa-capsules me-2 text-primary"></i>Tipo:</strong> <span id="medicamento-tipo"></span></p>
+                                    <p class="mb-0"><strong><i class="fas fa-industry me-2 text-primary"></i>Marca:</strong> <span id="medicamento-marca"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
