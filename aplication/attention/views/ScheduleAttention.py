@@ -72,7 +72,6 @@ class ScheduleAttentionUpdateView(LoginRequiredMixin, UpdateViewMixin, UpdateVie
 
 class ScheduleAttentionDeleteView(DeleteView, DeleteViewMixin, LoginRequiredMixin):
     model = HorarioAtencion
-    template_name = 'attention/schedule_attention/delete.html'
     success_url = reverse_lazy('attention:schedule_attention_list')
 
     def post(self, request, *args, **kwargs):

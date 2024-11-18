@@ -19,6 +19,14 @@ from aplication.attention.views.quotes import (
   QuoteDetailView,
   QuoteDeleteView
 )
+from aplication.attention.views.serviciosAdicionales import (
+  ServiciosAdicionalesListView,
+  ServiciosAdicionalesCreateView,
+  ServiciosAdicionalesUpdateView,
+  ServiciosAdicionalesDeleteView,
+  ServiciosAdicionalesDetailView
+)
+
 
 app_name = 'attention'  # define un espacio de nombre para la aplicacion
 
@@ -42,4 +50,11 @@ urlpatterns = [
   path('quote_update/<int:pk>/', QuoteUpdateView.as_view(), name='quote_update'),
   path('quote_detail/<int:pk>/', QuoteDetailView.as_view(), name='quote_detail'),
   path('quote_delete/<int:pk>/', QuoteDeleteView.as_view(), name='quote_delete'),
+  
+  # rutas de servicios adicionales
+  path('servicio_list/',ServiciosAdicionalesListView.as_view() ,name="servicio_list"),
+  path('servicio_create/', ServiciosAdicionalesCreateView.as_view(),name="servicio_create"),
+  path('servicio_update/<int:pk>/', ServiciosAdicionalesUpdateView.as_view(),name='servicio_update'),
+  path('servicio_delete/<int:pk>/', ServiciosAdicionalesDeleteView.as_view(),name='servicio_delete'),
+  path('servicio_detail/<int:pk>/', ServiciosAdicionalesDetailView.as_view(),name='servicio_detail'),
 ]

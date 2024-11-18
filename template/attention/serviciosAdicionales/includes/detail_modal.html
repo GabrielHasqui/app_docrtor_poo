@@ -1,0 +1,33 @@
+<!-- templates/includes/patient_detail_modal.html -->
+<div class="modal fade" id="serviciosModal" tabindex="-1" aria-labelledby="serviciosModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary bg-opacity-75">
+                <h5 class="modal-title text-white fw-bold" id="serviciosModalLabel">
+                    <i class="fas fa-user-circle me-2"></i>Detalles del Examen
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+           <div class="modal-body">
+    <div class="row">
+        <!-- Columna para los datos -->
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong><i class="fas fa-id-card me-2"></i>ID:</strong> <span id="servicio-id"></span></p>
+                    <p><strong><i class="fas fa-user me-2"></i>Nombre Servicio:</strong> <span id="servicio-nombre_servicio"></span></p>
+                    <p><strong><i class="fas fa-user me-2"></i>Costo Servicio:</strong> <span id="servicio-costo_servicio"></span></p>
+                    <p><strong><i class="fas fa-user me-2"></i>Descripcion:</strong> <span id="servicio-descripcion"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <i class="fas fa-times me-2"></i>Cerrar
+    </button>
+</div>
+</div>
+</div>
+</div>
