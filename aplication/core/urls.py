@@ -12,6 +12,7 @@ from aplication.core.views.brand_medicine import *
 from aplication.core.views.medicine import *
 from aplication.core.views.diagnosis import *
 from aplication.core.views.auditUser import *
+from aplication.core.views.statistics import *
 
 app_name = 'core'
 
@@ -92,6 +93,9 @@ urlpatterns = [
   # rutas de auditoría
   path('audit_user_list/', AuditUserListView.as_view(), name="audit_user_list"),
   path('audit_user_detail/<int:pk>/', AuditUserDetailView.as_view(), name='audit_user_detail'),
+  
+  # rutas de estadísticas
+  path('statistics/', VistaEstadisticas.as_view(), name='statistics'),
   
   
 ]

@@ -15,16 +15,16 @@
       <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 px-0 sidebar">
-          <div class="text-center py-1">
+          <div class="text-center py-4">
             <div class="d-flex flex-row justify-content-center align-items-center text-center">
               <img
-                src="{% static 'img/usuario_anonimo.png' %}"
-                alt="Logo"
-                class="mb-3 rounded-circle"
-                width="100px"
+          src="{% static 'img/Designer.png' %}"
+          alt="Logo"
+          class="mb-3 rounded-circle"
+          width="100px"
               />
             </div>
-            <h5 class="text-white">{{ request.user }}</h5>
+            <h5 class="text-white">SaludSync</h5>
           </div>
           <nav class="nav flex-column mt-4">
             <a class="nav-link active" href="#"><i class="fas fa-home me-2"></i> Dashboard</a>
@@ -33,59 +33,52 @@
             <a class="nav-link" href="{% url 'attention:attention_list' %}"><i class="fas fa-procedures me-2"></i> Atencion</a>
             <a class="nav-link" href="{% url 'attention:attention_list' %}"><i class="fas fa-procedures me-2"></i> Ficha Clinica</a>
             <a class="nav-link" href="#"><i class="fas fa-stethoscope me-2"></i> Pagos</a>
-            <a class="nav-link" href="#"><i class="fas fa-stethoscope me-2"></i> Examenes</a>
+            <a class="nav-link" href="{% url 'attention:examination_list' %}"><i class="fas fa-stethoscope me-2"></i> Examenes</a>
             <a class="nav-link" href="{% url 'security:admin_dashboard' %}"><i class="fas fa-cogs me-2"></i>Panel de administracion</a>
-
-            {% comment %}
-            <a class="nav-link" href="{% url 'core:medicine_list' %}"><i class="fas fa-cogs me-2"></i> Medicamento</a>
-            <a class="nav-link" href="{% url 'core:audit_user_list' %}"><i class="fas fa-cogs me-2"></i> audit user</a>
-            <a class="nav-link" href="{% url 'attention:quote_list' %}"><i class="fas fa-calendar-alt me-2"></i> Citas</a>
-            <a class="nav-link" href="{% url 'attention:schedule_attention_list' %}"><i class="fas fa-cogs me-2"></i> Horarios</a>
-            <a class="nav-link" href="{% url 'core:diagnosis_list' %}"><i class="fas fa-cogs me-2"></i> Diagnostico</a>
-            <a class="nav-link" href="{% url 'core:brand_medicine_list' %}"><i class="fas fa-cogs me-2"></i> Marca Medicina</a>
-            <a class="nav-link" href="{% url 'core:medication_type_list' %}"><i class="fas fa-cogs me-2"></i> Tipo Medicina</a>
-            <a class="nav-link" href="{% url 'core:specialty_list' %}"><i class="fas fa-cogs me-2"></i> Especialidad</a>
-            <a class="nav-link" href="{% url 'core:doctor_list' %}"><i class="fas fa-cogs me-2"></i> Doctor</a>
-            <a class="nav-link" href="{% url 'core:post_list' %}"><i class="fas fa-cogs me-2"></i> Cargo</a>
-            <a class="nav-link" href="{% url 'core:employee_list' %}"><i class="fas fa-cogs me-2"></i> Empleado</a>
-            <a class="nav-link" href="{% url 'core:blood_type_list' %}"><i class="fas fa-cogs me-2"></i> Tipo Sangre</a>
-            {% endcomment %}
+            <a class="nav-link" href="{% url 'security:admin_dashboard' %}"><i class="fas fa-cogs me-2"></i>Panel de administracion</a>
           </nav>
         </div>
 
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 px-md-4 main-content">
           <!-- Top Navbar -->
-          <nav class="navbar navbar-expand-lg navbar-light sticky-top mb-4">
+            <nav class="navbar navbar-expand-lg navbar-light sticky-top mb-4">
             <div class="container-fluid">
               <a
-                class="text-white text-decoration-none fw-bold d-inline-flex align-items-center gap-2 transition-all hover:text-primary-dark"
-                href="{% url 'core:home' %}"
+              class="text-white text-decoration-none fw-bold d-inline-flex align-items-center gap-2 transition-all hover:text-primary-dark"
+              href="{% url 'core:home' %}"
               >
-                <i class="fas fa-home"></i> {{ title }}
+                {% load static %}
+                <i class="fas fa-home"></i> 
+                <span class="ms-2">SaludSync</span>
               </a>
               <div class="d-flex align-items-center">
-                <div class="dropdown">
-                  <button
-                    class="btn btn-link dropdown-toggle text-white"
-                    type="button"
-                    id="dropdownMenuButton"
-                    data-bs-toggle="dropdown"
-                  >
-                    <i class="fas fa-user-md me-2"></i>Dr Daniel Vera
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                      <a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Perfil</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Salir</a>
-                    </li>
-                  </ul>
-                </div>
+              <div class="dropdown">
+                <button
+                class="btn btn-link dropdown-toggle text-white d-flex align-items-center"
+                type="button"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                >
+                {% if request.user.image %}
+                  <img src="{{ request.user.image.url }}" alt="User Photo" class="rounded-circle me-2" width="32" height="32">
+                {% else %}
+                  <img src="{% static 'img/usuario_anonimo.png' %}" alt="User Photo" class="rounded-circle me-2" width="32" height="32">
+                {% endif %}
+                {{ request.user.username }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="{% url 'security:profile_view' %}"><i class="fas fa-user me-2"></i>Perfil</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'security:auth_logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Salir</a>
+                </li>
+                </ul>
+              </div>
               </div>
             </div>
-          </nav>
+            </nav>
 
           <main>
             <!-- llama al message de exito o fracaso -->
@@ -166,7 +159,7 @@
                       <a class="btn btn-info fw-bold text-white" href="#">
                         <i class="fas fa-file-medical me-2"></i>Certificado
                       </a>
-                      <a class="btn btn-danger">
+                      <a class="btn btn-danger" href="{% url 'attention:clinical_record_list' %}">
                         <i class="fas fa-notes-medical me-2"></i>Ficha Clinica
                       </a>
                       <a class="btn btn-secondary text-white" href="#">
@@ -175,6 +168,9 @@
                       <a class="btn btn-warning text-white" href="#">
                         <i class="fas fa-file-medical me-2"></i>Examenes
                       </a>
+                        <a class="btn btn-primary text-white" href="{% url 'core:statistics' %}">
+                        <i class="fas fa-chart-bar me-2"></i>Estadísticas
+                        </a>
                     </div>
                   </div>
                 </div>
@@ -183,74 +179,218 @@
             <!-- Recent Activity & Upcoming Appointments -->
             <div class="row">
               <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title mb-4">Actividad Reciente</h5>
-                    <div class="activity-item d-flex align-items-center py-3 border-bottom">
-                      <div class="bg-primary text-white p-2 rounded me-3">
-                        <i class="fas fa-user-plus"></i>
-                      </div>
-                      <div>
-                        <p class="mb-0 fw-bold">Nuevo paciente registrado</p>
-                        <small class="text-muted">Hace 5 minutos</small>
-                      </div>
-                    </div>
-                    <div class="activity-item d-flex align-items-center py-3 border-bottom">
-                      <div class="bg-success text-white p-2 rounded me-3">
-                        <i class="fas fa-calendar-check"></i>
-                      </div>
-                      <div>
-                        <p class="mb-0 fw-bold">Cita completada</p>
-                        <small class="text-muted">Hace 15 minutos</small>
-                      </div>
-                    </div>
-                    <div class="activity-item d-flex align-items-center py-3">
-                      <div class="bg-info text-white p-2 rounded me-3">
-                        <i class="fas fa-file-medical"></i>
-                      </div>
-                      <div>
-                        <p class="mb-0 fw-bold">Nueva consulta registrada</p>
-                        <small class="text-muted">Hace 30 minutos</small>
-                      </div>
-                    </div>
-                  </div>
+              <div class="card h-100">
+              <div class="card-body">
+              <h5 class="card-title mb-4">Actividad Reciente</h5>
+              
+              <!-- Último paciente registrado -->
+              {% if ultimo_paciente %}
+              <div class="activity-item d-flex align-items-center py-2 border-bottom">
+                <div class="bg-primary text-white p-2 rounded me-2">
+                <i class="fas fa-user-plus fa-sm"></i>
+                </div>
+                <div>
+                <p class="mb-0">Último Paciente Registrado</p>
+                <small class="text-muted">{{ ultimo_paciente.nombre_completo|truncatechars:20 }}</small>
+                <small class="text-muted d-block">#{{ ultimo_paciente.id }}</small>
                 </div>
               </div>
+              {% endif %}
+
+              <!-- Última cita completada -->
+              {% if ultima_cita_completada %}
+              <div class="activity-item d-flex align-items-center py-2 border-bottom">
+                <div class="bg-success text-white p-2 rounded me-2">
+                <i class="fas fa-calendar-check fa-sm"></i>
+                </div>
+                <div>
+                <p class="mb-0">Última Cita Completada</p>
+                <small class="text-muted">{{ ultima_cita_completada.paciente.nombre_completo|truncatechars:20 }}</small>
+                <small class="text-muted d-block">{{ ultima_cita_completada.fecha|date:"d/m/Y" }}</small>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Última cita registrada -->
+              {% if ultima_cita %}
+              <div class="activity-item d-flex align-items-center py-2">
+                <div class="bg-info text-white p-2 rounded me-2">
+                <i class="fas fa-file-medical fa-sm"></i>
+                </div>
+                <div>
+                <p class="mb-0">Nueva Cita Registrada</p>
+                <small class="text-muted">{{ ultima_cita.paciente.nombre_completo|truncatechars:20 }}</small>
+                <small class="text-muted d-block">{{ ultima_cita.fecha|date:"d/m/Y" }}</small>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if not ultima_cita and not ultima_cita_completada and not ultimo_paciente %}
+              <div class="text-center text-muted py-2">
+                <small>No hay actividad reciente</small>
+              </div>
+              {% endif %}
+              </div>
+              </div>
+              </div>
+
               <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title mb-4">Próximas Citas</h5>
-                    <div class="appointment-item d-flex align-items-center py-3 border-bottom">
-                      <img src="/api/placeholder/48/48" alt="Patient" class="rounded-circle me-3" />
-                      <div>
-                        <p class="mb-0 fw-bold">María García</p>
-                        <small class="text-muted">Hoy - 10:00 AM</small>
-                      </div>
-                    </div>
-                    <div class="appointment-item d-flex align-items-center py-3 border-bottom">
-                      <img src="/api/placeholder/48/48" alt="Patient" class="rounded-circle me-3" />
-                      <div>
-                        <p class="mb-0 fw-bold">Carlos Rodríguez</p>
-                        <small class="text-muted">Hoy - 11:30 AM</small>
-                      </div>
-                    </div>
-                    <div class="appointment-item d-flex align-items-center py-3">
-                      <img src="/api/placeholder/48/48" alt="Patient" class="rounded-circle me-3" />
-                      <div>
-                        <p class="mb-0 fw-bold">Ana Martínez</p>
-                        <small class="text-muted">Hoy - 2:00 PM</small>
-                      </div>
-                    </div>
+              <div class="card h-100">
+                <div class="card-body">
+                <h5 class="card-title mb-4">Próximas Citas</h5>
+                {% for cita in proximas_citas %}
+                <div class="appointment-item d-flex align-items-center py-3 {% if not forloop.last %}border-bottom{% endif %}">
+                  {% if cita.paciente.foto %}
+                  <img src="{{ cita.paciente.foto.url }}" alt="Patient" class="rounded-circle me-3" width="48" height="48"/>
+                  {% else %}
+                  <img src="{% static 'img/usuario_anonimo.png' %}" alt="Patient" class="rounded-circle me-3" width="48" height="48"/>
+                  {% endif %}
+                  <div>
+                  <p class="mb-0 fw-bold">{{ cita.paciente.nombres }}</p>
+                  <small class="text-muted">{{ cita.fecha|date:"d/m/Y" }} - {{ cita.hora_cita|time:"H:i A" }}</small>
                   </div>
                 </div>
+                {% empty %}
+                <div class="text-center text-muted py-3">
+                  No hay citas programadas
+                </div>
+                {% endfor %}
+                </div>
+              </div>
               </div>
             </div>
             {% endblock %}
-          </main>
+            </main>
+          </div>
+          </div>
+        </div>
+  <!-- Auth Modal -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header" style="background: linear-gradient(45deg, #010822, #020b2e); color: white;">
+          <h5 class="modal-title fw-bold" id="authModalLabel">
+            <i class="fas fa-hospital-user me-2"></i>
+            Bienvenido a SaludSync
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="row g-0">
+            <!-- Columna de imagen -->
+            <div class="col-md-5 d-none d-md-block">
+              <div class="h-100 position-relative" style="background: linear-gradient(45deg, #010822, #020b2e);">
+                <img src="{% static 'img/images.jpg' %}" alt="Medical System" 
+                     style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+                <div class="position-absolute bottom-0 text-white p-3" style="background: rgba(1,8,34,0.8);">
+                  <h6 class="mb-1">Sistema de Gestión Médica</h6>
+                  <small>Administra tu consultorio de manera eficiente</small>
+                </div>
+              </div>
+            </div>
+            <!-- Columna de contenido -->
+            <div class="col-md-7 p-4">
+              <div class="text-center mb-4">
+                <i class="fas fa-heartbeat fa-3x mb-3" style="color: #010822;"></i>
+                <h5 style="color: #010822;">Sistema Integral de Gestión Médica</h5>
+                <p class="text-muted">Para acceder a nuestro sistema médico necesitas:</p>
+              </div>
+              
+              <div class="d-flex align-items-center mb-3 p-3 rounded-3 shadow-sm access-option">
+                <div class="icon-circle me-3">
+                  <i class="fas fa-user-md"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0" style="color: #010822;">Crear cuenta profesional</h6>
+                  <small class="text-muted">Registra tu consultorio médico y comienza a gestionar pacientes</small>
+                </div>
+              </div>
+              
+              <div class="d-flex align-items-center mb-4 p-3 rounded-3 shadow-sm access-option">
+                <div class="icon-circle me-3" style="background: #020b2e;">
+                  <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0" style="color: #010822;">Acceder a mi cuenta</h6>
+                  <small class="text-muted">Ingresa a tu panel de administración médica</small>
+                </div>
+              </div>
+      
+              <div class="alert shadow-sm d-flex align-items-center" role="alert" 
+                   style="background: linear-gradient(45deg, #010822, #020b2e); color: white;">
+                <i class="fas fa-info-circle me-2"></i>
+                <div>
+                  El acceso completo al sistema está reservado para profesionales médicos registrados.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>
+            Cancelar
+          </button>
+          <div class="d-flex gap-2">
+            <a href="{% url 'security:auth_login' %}" class="btn rounded-pill" 
+               style="background: linear-gradient(45deg, #010822, #020b2e); color: white;">
+              <i class="fas fa-sign-in-alt me-2"></i>
+              Iniciar Sesión
+            </a>
+            <a href="{% url 'security:auth_signup' %}" class="btn btn-success rounded-pill">
+              <i class="fas fa-user-md me-2"></i>
+              Registro Médico
+            </a>
+          </div>
         </div>
       </div>
     </div>
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    {% block js %}{% endblock %}
+  </div>
+
+  <style>
+  .access-option {
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+  }
+  .access-option:hover {
+    transform: translateX(10px);
+    cursor: pointer;
+    background: #e9ecef;
+  }
+  .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #010822, #020b2e);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  </style>
+  
+  <!-- Script para mostrar el modal -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      {% if not request.user.is_authenticated %}
+        // Mostrar el modal al cargar la página si el usuario no está autenticado
+        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        authModal.show();
+        
+        // Agregar event listeners a los enlaces del menú
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+          link.addEventListener('click', function(e) {
+            // Si el usuario no está autenticado y no es el enlace de inicio
+            if (!link.classList.contains('active')) {
+              e.preventDefault();
+              authModal.show();
+            }
+          });
+        });
+      {% endif %}
+    });
+  </script>
+   <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+   {% block js %}{% endblock %}
   </body>
 </html>

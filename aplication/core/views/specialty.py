@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from aplication.core.forms.specialty import SpecialtyForm
 from aplication.core.models import Especialidad
-from doctor.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
+from aplication.security.mixins.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
 from doctor.utils import save_audit
 
 class SpecialtyListView(LoginRequiredMixin, ListViewMixin, ListView):

@@ -1,0 +1,152 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/clinical_record.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Botones de navegación superior -->
+<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <a href="javascript:history.back()" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Regresar
+    </a>
+    <div class="flex gap-4">
+        <a href="{% url 'attention:imprimir_historial_clinico' patient.id %}" class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Imprimir Historia
+        </a>
+    </div>
+</div>
+
+<!-- Contenido principal -->
+<div class="container mx-auto px-4 pb-8">
+    <div class="grid md:grid-cols-3 gap-6">
+        <!-- Columna izquierda: Información del paciente y signos vitales -->
+        <div class="md:col-span-1">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-4">
+                <img src="{{ patient.foto.url }}" alt="Imagen del Paciente" class="w-24 h-24 object-cover rounded-full">
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-600">{{ patient.nombres }}</h3>
+                    <p class="text-gray-600">{{ patient.apellidos }}</p>
+                </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Cédula</p>
+                    <p class="text-gray-700">{{ patient.cedula }}</p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Edad</p>
+                    <p class="text-gray-700">{{ edad }} años</p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Género</p>
+                    <p class="text-gray-700">
+                        {% if patient.sexo == 'M' %}
+                            Masculino
+                        {% else %}
+                            Femenino
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Teléfono</p>
+                    <p class="text-gray-700">{{ patient.telefono }}</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-sm font-medium text-gray-500">Fecha de Nacimiento</p>
+                    <p class="text-gray-700">{{ patient.fecha_nacimiento }}</p>
+                </div>
+                </div>
+            </div>
+            </div>
+
+            {% if ultima_atencion %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <h4 class="text-lg font-semibold text-cyan-600 mb-4">Signos Vitales Recientes</h4>
+                    <div class="space-y-3">
+                        <p class="text-gray-700"><span class="font-medium">Peso:</span> {{ ultima_atencion.peso }} kg</p>
+                        <p class="text-gray-700"><span class="font-medium">Altura:</span> {{ ultima_atencion.altura }} m</p>
+                        <p class="text-gray-700"><span class="font-medium">IMC:</span> {{ imc }}</p>
+                        <p class="text-gray-700"><span class="font-medium">Clasificación:</span> {{ imc_clasificacion }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Columna derecha: Historial, medicamentos y certificados -->
+        <div class="md:col-span-2">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <!-- Historial de Atenciones con acordeón -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-green-600 mb-4">Historial de Atenciones</h4>
+                        {% for atencion in atenciones %}
+                        <details class="mb-3 bg-gray-50 rounded-lg">
+                            <summary class="p-3 cursor-pointer hover:bg-gray-100">
+                                {{ atencion.fecha_atencion }} - {{ atencion.motivo_consulta }}
+                            </summary>
+                            <div class="p-3 border-t">
+                                <p class="font-medium text-gray-700">Diagnósticos:</p>
+                                <ul class="list-disc pl-5 text-gray-600">
+                                    {% for diagnostico in atencion.diagnosticos.all %}
+                                    <li>{{ diagnostico.descripcion }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </details>
+                        {% empty %}
+                        <p class="text-gray-500">No hay atenciones registradas.</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Medicamentos -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-yellow-500 mb-4">Medicamentos Recetados</h4>
+                        <div class="grid gap-2">
+                            {% for detalle in medicamentos %}
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="text-gray-700">
+                                    <span class="font-medium">{{ detalle.medicamento.nombre }}</span><br>
+                                    Dosis: {{ detalle.cantidad }} | Frecuencia: {{ detalle.prescripcion }}
+                                </p>
+                            </div>
+                            {% empty %}
+                            <p class="text-gray-500">No hay medicamentos registrados.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Certificados -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-600 mb-4">Certificados Médicos</h4>
+                        <div class="grid gap-2">
+                            {% for certificado in certificados %}
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="text-gray-700">
+                                    <span class="font-medium">Fecha:</span> {{ certificado.fecha_emision }}<br>
+                                    <span class="font-medium">Días de reposo:</span> {{ certificado.dias_reposo }}
+                                </p>
+                            </div>
+                            {% empty %}
+                            <p class="text-gray-500">No hay certificados registrados.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

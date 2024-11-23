@@ -1,0 +1,144 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ title }}</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Pacientes</h5>
+                    <h3>{{ total_pacientes }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Citas</h5>
+                    <h3>{{ total_citas }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tasa Finalización</h5>
+                    <h3>{{ tasa_finalizacion }}%</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Edad Promedio</h5>
+                    <h3>{{ edad_promedio }} años</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Citas Mensuales {{ año_actual }}</h5>
+                    <canvas id="citasMensuales"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pacientes por Género</h5>
+                    <canvas id="pacientesPorGenero"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Citas por Día</h5>
+                    <canvas id="citasPorDia"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Medicamentos más Recetados</h5>
+                    <canvas id="medicamentosRecetados"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extrajs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Citas Mensuales
+    new Chart(document.getElementById('citasMensuales'), {
+        type: 'line',
+        data: {
+            labels: {{ citas_mensuales|safe|stringformat:"s" }}.map(item => {
+                const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                return meses[item.mes - 1];
+            }),
+            datasets: [{
+                label: 'Citas',
+                data: {{ citas_mensuales|safe|stringformat:"s" }}.map(item => item.total),
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        }
+    });
+
+    // Pacientes por Género
+    new Chart(document.getElementById('pacientesPorGenero'), {
+        type: 'bar',
+        data: {
+            labels: {{ pacientes_por_genero|safe|stringformat:"s" }}.map(item => item.sexo),
+            datasets: [{
+                data: {{ pacientes_por_genero|safe|stringformat:"s" }}.map(item => item.total),
+                backgroundColor: ['#FF6384', '#36A2EB']
+            }]
+        }
+    });
+
+    // Citas por Día
+    new Chart(document.getElementById('citasPorDia'), {
+        type: 'bar',
+        data: {
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            datasets: [{
+                label: 'Citas',
+                data: {{ citas_por_dia|safe|stringformat:"s" }}.map(item => item.total),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)'
+            }]
+        }
+    });
+
+    // Medicamentos Recetados
+    new Chart(document.getElementById('medicamentosRecetados'), {
+        type: 'bar',
+        data: {
+            labels: {{ medicamentos_mas_recetados|safe|stringformat:"s" }}.map(item => item.medicamento__nombre),
+            datasets: [{
+                label: 'Cantidad Recetada',
+                data: {{ medicamentos_mas_recetados|safe|stringformat:"s" }}.map(item => item.total_recetado),
+                backgroundColor: 'rgba(75, 192, 192, 0.5)'
+            }]
+        },
+        options: {
+            indexAxis: 'y'
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header de la Factura -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold">Factura #{{ factura.numero_factura }}</h1>
+                <p class="text-gray-600">Fecha: {{ factura.fecha_emision|date:"d/m/Y H:i" }}</p>
+                <p class="text-gray-600">Estado: <span class="font-semibold">{{ factura.get_estado_display }}</span></p>
+            </div>
+            <div class="text-right">
+                <h2 class="text-lg font-semibold">{{ paciente.nombre_completo }}</h2>
+                <p class="text-gray-600">CI/RUC: {{ paciente.identificacion }}</p>
+                <p class="text-gray-600">Teléfono: {{ paciente.telefono }}</p>
+            </div>
+        </div>
+
+        <!-- Detalles de la Consulta -->
+        {% if consultas %}
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-3">Consulta Médica</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for consulta in consultas %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ consulta.descripcion }}</td>
+                            <td class="px-6 py-4 text-right">${{ consulta.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Detalles de Medicamentos -->
+        {% if medicamentos %}
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-3">Medicamentos</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medicamento</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unit.</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for med in medicamentos %}
+                        <tr>
+                            <td class="px-6 py-4">{{ med.descripcion }}</td>
+                            <td class="px-6 py-4 text-center">{{ med.cantidad }}</td>
+                            <td class="px-6 py-4 text-right">${{ med.precio_unitario|floatformat:2 }}</td>
+                            <td class="px-6 py-4 text-right">${{ med.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Detalles de Exámenes -->
+        {% if examenes %}
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-3">Exámenes</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Examen</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for examen in examenes %}
+                        <tr>
+                            <td class="px-6 py-4">{{ examen.descripcion }}</td>
+                            <td class="px-6 py-4 text-right">${{ examen.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Detalles de Servicios -->
+        {% if servicios %}
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-3">Servicios Adicionales</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Servicio</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unit.</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for servicio in servicios %}
+                        <tr>
+                            <td class="px-6 py-4">{{ servicio.descripcion }}</td>
+                            <td class="px-6 py-4 text-center">{{ servicio.cantidad }}</td>
+                            <td class="px-6 py-4 text-right">${{ servicio.precio_unitario|floatformat:2 }}</td>
+                            <td class="px-6 py-4 text-right">${{ servicio.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Totales -->
+        <div class="border-t border-gray-200 pt-4">
+            <div class="flex justify-end">
+                <div class="w-64">
+                    <div class="flex justify-between py-2">
+                        <span class="font-medium">Subtotal:</span>
+                        <span>${{ factura.subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="font-medium">IVA (12%):</span>
+                        <span>${{ factura.iva|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between py-2 text-lg font-bold">
+                        <span>Total:</span>
+                        <span>${{ factura.total|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Opciones de Pago -->
+        {% if factura.estado == 'BORRADOR' %}
+        <div class="mt-8 border-t border-gray-200 pt-6">
+            <h3 class="text-lg font-semibold mb-4">Métodos de Pago</h3>
+            <div class="flex space-x-4">
+                <button onclick="pagarEfectivo()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                    Pagar en Efectivo
+                </button>
+                <div id="paypal-button-container" class="inline-block"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if factura.estado == 'BORRADOR' and paypal_client_id %}
+<!-- PayPal Script -->
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD"></script>
+<script>
+    function pagarEfectivo() {
+        fetch('{% url "factura:detail" factura.id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'payment_method=cash'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error al procesar el pago');
+        });
+    }
+
+    // PayPal Buttons
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return fetch('{% url "attention:invoice_detail" factura.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded','X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'payment_method=paypal'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'redirect') {
+                    return actions.redirect(data.url);
+                } else {
+                    throw new Error(data.message);
+                }
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                window.location.href = '{% url "attention:invoice_payment_success" %}?PayerID=' + data.payerID;
+            });
+        },
+        onCancel: function(data) {
+            window.location.href = '{% url "attention:invoice_payment_cancel" %}';
+        },
+        onError: function(err) {
+            alert('Error al procesar el pago con PayPal');
+        }
+    }).render('#paypal-button-container');
+</script>
+{% endif %}
+
+<!-- Toast Messages -->
+<div id="toast" class="fixed right-4 top-4 transform transition-transform duration-300 ease-in-out translate-x-full">
+    <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        <span id="toast-message"></span>
+    </div>
+</div>
+
+<script>
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        toastMessage.textContent = message;
+        toast.classList.remove('translate-x-full');
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+        }, 3000);
+    }
+
+
+</script>
+{% endblock %}

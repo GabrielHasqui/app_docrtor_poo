@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from aplication.attention.models import HorarioAtencion
 from aplication.attention.forms.ScheduleAttention import ScheduleAttentionForm
-from doctor.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
+from aplication.security.mixins.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
 from doctor.utils import save_audit
 
 class ScheduleAttentionListView(LoginRequiredMixin, ListViewMixin, ListView):

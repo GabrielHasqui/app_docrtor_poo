@@ -1,0 +1,261 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block css %}
+<style>
+    .form-floating > label {
+        padding: 0.5rem 0.75rem;
+    }
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        height: 3.5rem;
+        line-height: 1.25;
+    }
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+    .section-title {
+        color: #2563eb;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    .btn-primary {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        padding: 0.625rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xxl-10">
+            <h3 class="text-center mb-4 fw-bold text-primary-emphasis">
+                Generar Factura
+            </h3>
+            
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form id="frmFactura" method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Información de la Factura -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="atencionSelect" required>
+                                        <option value="">Seleccione una atención</option>
+                                        {% for atencion in atenciones %}
+                                            <option value="{{ atencion.id }}" 
+                                                    data-paciente="{{ atencion.paciente }}"
+                                                    data-fecha="{{ atencion.fecha_atencion|date:'Y-m-d' }}">
+                                                {{ atencion.paciente }} - {{ atencion.fecha_atencion|date:'d/m/Y' }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label>Atención Médica</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="numeroFactura" required>
+                                    <label>Número de Factura</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detalles de la Factura -->
+                        <h5 class="text-primary-emphasis fw-bold mb-3">Detalles de la Factura</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-hover" id="detallesTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-primary">Descripción</th>
+                                        <th class="text-end text-primary">Cantidad</th>
+                                        <th class="text-end text-primary">Precio Unitario</th>
+                                        <th class="text-end text-primary">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold">Total:</td>
+                                        <td class="text-end fw-bold" id="totalFactura">$0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Opciones de Emisión -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emitirFactura">
+                                    <label class="form-check-label" for="emitirFactura">
+                                        Emitir factura inmediatamente
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" onclick="factura.saveFactura()" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar
+                            </button>
+                            <!--  -->
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+class Factura {
+    constructor() {
+        this.detalles = [];
+        this.total = 0;
+        
+        // Binding de eventos
+        this.initializeEvents();
+    }
+
+    initializeEvents() {
+        // Evento para cambio de atención
+        document.querySelector('#atencionSelect').addEventListener('change', (e) => {
+            this.loadAtencionDetails(e.target.value);
+        });
+    }
+
+    async loadAtencionDetails(atencionId) {
+        if (!atencionId) {
+            this.clearDetails();
+            return;
+        }
+
+        try {
+            const response = await fetch(`/attention/attention_detail/${atencionId}/`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.detalles = data.detalles;
+                this.updateDetallesTable();
+                this.calculateTotal();
+            } else {
+                alert('Error al cargar los detalles de la atención');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al cargar los detalles de la atención');
+        }
+    }
+
+    updateDetallesTable() {
+        const tbody = document.querySelector('#detallesTable tbody');
+        tbody.innerHTML = '';
+
+        this.detalles.forEach(detalle => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${detalle.descripcion}</td>
+                <td class="text-end">${detalle.cantidad}</td>
+                <td class="text-end">$${detalle.precio_unitario.toFixed(2)}</td>
+                <td class="text-end">$${(detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    calculateTotal() {
+        this.total = this.detalles.reduce((sum, detalle) => 
+            sum + (detalle.cantidad * detalle.precio_unitario), 0);
+        
+        document.querySelector('#totalFactura').textContent = `$${this.total.toFixed(2)}`;
+    }
+
+    clearDetails() {
+        this.detalles = [];
+        this.total = 0;
+        this.updateDetallesTable();
+        document.querySelector('#totalFactura').textContent = '$0.00';
+    }
+
+    validateForm() {
+        const atencionId = document.querySelector('#atencionSelect').value;
+        const numeroFactura = document.querySelector('#numeroFactura').value;
+
+        if (!atencionId) {
+            alert('Por favor, seleccione una atención médica');
+            return false;
+        }
+
+        if (!numeroFactura) {
+            alert('Por favor, ingrese el número de factura');
+            return false;
+        }
+
+        if (this.detalles.length === 0) {
+            alert('No hay detalles para facturar');
+            return false;
+        }
+
+        return true;
+    }
+
+    async saveFactura() {
+        if (!this.validateForm()) return;
+
+        const formData = {
+            atencion: document.querySelector('#atencionSelect').value,
+            numero_factura: document.querySelector('#numeroFactura').value,
+            emitir: document.querySelector('#emitirFactura').checked
+        };
+
+        try {
+            const response = await fetch(window.location.pathname, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert(data.msg);
+            } else {
+                alert(data.msg || 'Error al guardar la factura');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al guardar la factura');
+        }
+    }
+}
+
+// Inicialización cuando el DOM está listo
+document.addEventListener('DOMContentLoaded', function() {
+    window.factura = new Factura();
+});
+</script>
+{% endblock %}

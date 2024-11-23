@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView
-from aplication.core.models import AuditUser
-from doctor.mixins import ListViewMixin
+from aplication.security.models import AuditUser
+from aplication.security.mixins.mixins import ListViewMixin
 from django.http import JsonResponse
 
 class AuditUserListView(LoginRequiredMixin, ListViewMixin, ListView):

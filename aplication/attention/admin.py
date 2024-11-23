@@ -5,7 +5,7 @@ from aplication.attention.models import (
     Atencion,
     DetalleAtencion,
     ServiciosAdicionales,
-    CostosAtencion,
+    Factura,Examen
 )
 
 # Admin para HorarioAtencion
@@ -45,10 +45,14 @@ class ServiciosAdicionalesAdmin(admin.ModelAdmin):
     list_display = ('nombre_servicio', 'costo_servicio')
     search_fields = ('nombre_servicio',)
 
-# Admin para CostosAtencion
-@admin.register(CostosAtencion)
-class CostosAtencionAdmin(admin.ModelAdmin):
-    list_display = ('atencion', 'total', 'fecha_pago')
+# Admin para Factura
+@admin.register(Factura)
+class FacturaAdmin(admin.ModelAdmin):
+    list_display = ('atencion', 'total')
     search_fields = ('atencion__paciente__nombre',)
 
-
+# Admin para Examen
+@admin.register(Examen)
+class ExamenAdmin(admin.ModelAdmin):
+    list_display = ('tipo_examen', 'precio')
+    search_fields = ('tipo_examen', 'descripcion')

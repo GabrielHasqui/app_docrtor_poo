@@ -5,7 +5,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DeleteView, D
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Q
-from doctor.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
+from aplication.security.mixins.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from doctor.utils import save_audit
 

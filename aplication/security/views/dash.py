@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from doctor.mixins import ListViewMixin
+from aplication.security.mixins.mixins import ListViewMixin
 
 class AdminDashboardView(LoginRequiredMixin, ListViewMixin, View):
     def get(self, request):

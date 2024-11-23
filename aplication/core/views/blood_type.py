@@ -7,7 +7,7 @@ from django.http import JsonResponse
 
 from aplication.core.forms.blood_type import BloodTypeForm
 from aplication.core.models import TipoSangre
-from doctor.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
+from aplication.security.mixins.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
 from doctor.utils import save_audit
 
 class BloodTypeListView(LoginRequiredMixin, ListViewMixin, ListView):

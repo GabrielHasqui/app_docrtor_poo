@@ -1,0 +1,91 @@
+{% extends 'components/base.html' %}
+{% load static %} 
+{% load i18n %}
+
+{% block title %}{{ title1 }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg">
+    <div class="card-header" style="background: linear-gradient(45deg, #010822, #020b2e); color: white;">
+        <h4 class="mb-0 d-flex align-items-center">
+            <i class="fas fa-user-circle me-2"></i>
+            Información del Perfil
+        </h4>
+    </div>
+    <div class="card-body bg-light">
+        <div class="row g-4">
+            <!-- Columna de imagen -->
+            <div class="col-lg-3 col-md-4">
+                <div class="text-center">
+                    {% if request.user.image %}
+                        <img src="{{ request.user.image.url }}" 
+                             alt="Foto de perfil" 
+                             class="img-thumbnail rounded-circle shadow"
+                             style="width: 180px; height: 180px; object-fit: cover; border: 3px solid #020b2e;">
+                    {% else %}
+                        <img src="{% static 'img/usuario_anonimo.png' %}" 
+                             alt="Foto por defecto" 
+                             class="img-thumbnail rounded-circle shadow"
+                             style="width: 180px; height: 180px; object-fit: cover; border: 3px solid #020b2e;">
+                    {% endif %}
+                    <div class="mt-3">
+                        <span class="badge" style="background: {% if request.user.is_superuser %}#dc3545{% else %}#020b2e{% endif %}">
+                            {% if request.user.is_superuser %}
+                                <i class="fas fa-user-shield me-1"></i>Administrador
+                            {% else %}
+                                <i class="fas fa-user me-1"></i>Usuario
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna de información -->
+            <div class="col-lg-9 col-md-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="mb-4" style="color: #020b2e;">{{ request.user.get_full_name }}</h3>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-white rounded shadow-sm">
+                                    <p class="mb-1"><i class="fas fa-envelope text-primary me-2"></i>Correo</p>
+                                    <h6 class="mb-0">{{ request.user.email }}</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-white rounded shadow-sm">
+                                    <p class="mb-1"><i class="fas fa-id-card text-primary me-2"></i>DNI</p>
+                                    <h6 class="mb-0">{{ request.user.dni|default:"No registrado" }}</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-white rounded shadow-sm">
+                                    <p class="mb-1"><i class="fas fa-phone text-primary me-2"></i>Teléfono</p>
+                                    <h6 class="mb-0">{{ request.user.phone|default:"No registrado" }}</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-white rounded shadow-sm">
+                                    <p class="mb-1"><i class="fas fa-map-marker-alt text-primary me-2"></i>Dirección</p>
+                                    <h6 class="mb-0">{{ request.user.direction|default:"No registrada" }}</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="mt-4 d-flex gap-2">
+                            <a href="{% url 'security:auth_profile' %}" class="btn text-white" style="background: #020b2e;">
+                                <i class="fas fa-edit me-2"></i>Editar Perfil
+                            </a>
+                            <a href="#" class="btn btn-outline-secondary">
+                                <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

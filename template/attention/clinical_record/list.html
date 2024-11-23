@@ -1,0 +1,81 @@
+{% extends "components/base.html" %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 col-lg-12 px-md-4 main-content">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="card-title mb-0">Historial Clínico de Pacientes</h5>
+                        </div>
+
+                        <!-- Search and Filter -->
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between g-3 mb-4">
+                            <form method="GET" action="{% url 'attention:clinical_record_list' %}" class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
+                                <div class="col-md-20">
+                                    <input type="text" name="q" class="form-control search-box" value="{{ request.GET.q }}" placeholder="Buscar paciente por nombre, apellido o cédula...">
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Patients Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Cédula</th>
+                                        <th>Nombres</th>
+                                        <th>Apellidos</th>
+                                        <th>Fecha Nacimiento</th>
+                                        <th>Teléfono</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for patient in patients %}
+                                        <tr>
+                                            <td>{{ patient.cedula }}</td>
+                                            <td>{{ patient.nombres }}</td>
+                                            <td>{{ patient.apellidos }}</td>
+                                            <td>{{ patient.fecha_nacimiento }}</td>
+                                            <td>{{ patient.telefono }}</td>
+                                            <td>
+                                                <div class="action-buttons d-flex gap-2">
+                                                    <a href="{% url 'attention:clinical_record_detail' patient.id %}" class="btn btn-info btn-sm" title="Ver Historia Clínica">
+                                                        <i class="fas fa-file-medical"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav class="d-flex justify-content-between align-items-center mt-4">
+                            <p class="text-muted mb-0">{{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} pacientes</p>
+                            <ul class="pagination mb-0">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1"><i class="fas fa-chevron-left"></i></a>
+                                    </li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

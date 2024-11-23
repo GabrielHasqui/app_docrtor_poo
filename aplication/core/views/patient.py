@@ -6,13 +6,14 @@ from django.views.generic import CreateView, ListView, UpdateView, DeleteView, D
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Q
-from doctor.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin
+from aplication.security.mixins.mixins import CreateViewMixin, DeleteViewMixin, ListViewMixin, UpdateViewMixin, PermissionMixin
 from doctor.utils import save_audit
 
-class PatientListView(LoginRequiredMixin,ListViewMixin,ListView):
+class PatientListView(LoginRequiredMixin,ListViewMixin,ListView,PermissionMixin):
     template_name = "core/patient/list.html"
     model = Paciente
     context_object_name = 'pacientes'
+    permission_required = 'view_paciente'
     # query = None
     # paginate_by = 2
     
@@ -33,11 +34,12 @@ class PatientListView(LoginRequiredMixin,ListViewMixin,ListView):
         # context['title1'] = "Consulta de Pacientes"
         # return context
     
-class PatientCreateView(LoginRequiredMixin,CreateViewMixin, CreateView):
+class PatientCreateView(LoginRequiredMixin,CreateViewMixin, CreateView,PermissionMixin):
     model = Paciente
     template_name = 'core/patient/form.html'
     form_class = PatientForm
     success_url = reverse_lazy('core:patient_list')
+    permission_required = 'add_paciente'
     # permission_required = 'add_supplier' # en PermissionMixn se verfica si un grupo tiene el permiso
 
     def get_context_data(self, **kwargs):
@@ -61,11 +63,12 @@ class PatientCreateView(LoginRequiredMixin,CreateViewMixin, CreateView):
         print(form.errors)
         return self.render_to_response(self.get_context_data(form=form))
     
-class PatientUpdateView(LoginRequiredMixin,UpdateViewMixin,UpdateView):
+class PatientUpdateView(LoginRequiredMixin,UpdateViewMixin,UpdateView,PermissionMixin):
     model = Paciente
     template_name = 'core/patient/form.html'
     form_class = PatientForm
     success_url = reverse_lazy('core:patient_list')
+    permission_required = 'change_paciente'
     # permission_required = 'change_patient'
 
     def get_context_data(self, **kwargs):
@@ -89,11 +92,12 @@ class PatientUpdateView(LoginRequiredMixin,UpdateViewMixin,UpdateView):
         print(form.errors)
         return self.render_to_response(self.get_context_data(form=form))
     
-class PatientDeleteView(LoginRequiredMixin,DeleteViewMixin,DeleteView):
+class PatientDeleteView(LoginRequiredMixin,DeleteViewMixin,DeleteView,PermissionMixin):
     model = Paciente
     # template_name = 'core/patient/form.html'
     success_url = reverse_lazy('core:patient_list')
     # permission_required = 'delete_supplier'
+    permission_required = 'delete_paciente'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()

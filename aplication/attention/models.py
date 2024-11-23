@@ -1,11 +1,12 @@
+from datetime import timezone
+from decimal import Decimal
 from django.db import models
 from aplication.core.models import *
 from doctor.const import CITA_CHOICES, DIA_SEMANA_CHOICES, EXAMEN_CHOICES
 from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
 
-# Modelo que representa los días y horas de atención de un doctor.
-# Incluye los días de la semana, la hora de inicio y la hora de fin de la atención.
 class HorarioAtencion(models.Model):
     dia_semana = models.CharField(max_length=10, choices=DIA_SEMANA_CHOICES, verbose_name="Día de la Semana", unique=True)
     hora_inicio = models.TimeField(verbose_name="Hora de Inicio")
@@ -30,7 +31,6 @@ class HorarioAtencion(models.Model):
         verbose_name_plural = "Horarios de Atención de los Doctores"
 
 
-# Modelo para citas médicas
 class CitaMedica(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, verbose_name="Paciente", related_name="pacientes_citas")
     fecha = models.DateField(verbose_name="Fecha de la Cita")
@@ -46,9 +46,6 @@ class CitaMedica(models.Model):
         verbose_name = "Cita Médica"
         verbose_name_plural = "Citas Médicas"
 
-
-# Modelo que representa la cabecera de una atención médica.
-# Contiene la información general del paciente, diagnóstico, motivo de consulta y tratamiento.
 class Atencion(models.Model):
     paciente = models.ForeignKey(Paciente, on_delete=models.PROTECT, verbose_name="Paciente", related_name="doctores_atencion")
     fecha_atencion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Atención")
@@ -66,7 +63,12 @@ class Atencion(models.Model):
     examen_fisico = models.TextField(null=True, blank=True, verbose_name="Examen Físico")
     examenes_enviados = models.TextField(null=True, blank=True, verbose_name="Examenes enviados")
     comentario_adicional = models.TextField(null=True, blank=True, verbose_name="Comentario")
-
+    valor_consulta = models.DecimalField(
+    max_digits=10, 
+    decimal_places=2, 
+    verbose_name="Valor de Consulta",
+    default=0.00
+    )
     @property
     def get_diagnosticos(self):
         return " - ".join([c.descripcion for c in self.diagnostico.all().order_by('descripcion')])
@@ -79,6 +81,34 @@ class Atencion(models.Model):
         else:
             return None
 
+    def get_total_medicamentos(self):
+        """Calcula el total de medicamentos recetados"""
+        return self.medicamentos_recetados.aggregate(
+            total=Sum(models.F('cantidad') * models.F('medicamento__precio'))
+        )['total'] or Decimal('0.00')
+    
+    def get_total_examenes(self):
+        """Calcula el total de exámenes realizados"""
+        return self.examenes_realizados.aggregate(
+            total=Sum('examen__precio')
+        )['total'] or Decimal('0.00')
+
+    def get_total_servicios(self):
+        """Calcula el total de servicios adicionales"""
+        return self.servicios_prestados.aggregate(
+            total=Sum('servicio__costo_servicio')
+        )['total'] or Decimal('0.00')
+
+    def get_total_atencion(self):
+        """Calcula el total general de la atención"""
+        return (
+            self.valor_consulta +
+            self.get_total_medicamentos() +
+            self.get_total_examenes() +
+            self.get_total_servicios()
+        )
+    
+    
     def __str__(self):
         return f"Atención de {self.paciente} el {self.fecha_atencion}"
 
@@ -87,15 +117,16 @@ class Atencion(models.Model):
         verbose_name = "Atención"
         verbose_name_plural = "Atenciones"
 
-
-# Modelo que representa el detalle de una atención médica.
-# Relaciona cada atención con los medicamentos recetados y su cantidad.
 class DetalleAtencion(models.Model):
-    atencion = models.ForeignKey(Atencion, on_delete=models.CASCADE, verbose_name="Cabecera de Atención", related_name="atenciones")
-    medicamento = models.ForeignKey(Medicamento, on_delete=models.CASCADE, verbose_name="Medicamento", related_name="medicamentos")
+    atencion = models.ForeignKey(Atencion, on_delete=models.CASCADE, verbose_name="Cabecera de Atención", related_name='medicamentos_recetados')
+    medicamento = models.ForeignKey(Medicamento, on_delete=models.CASCADE, verbose_name="Medicamento", related_name='prescripciones')
     cantidad = models.PositiveIntegerField(verbose_name="Cantidad")
     prescripcion = models.TextField(verbose_name="Prescripción")
     duracion_tratamiento = models.PositiveIntegerField(verbose_name="Duración del Tratamiento (días)", null=True, blank=True)
+
+    @property
+    def subtotal(self):
+        return self.cantidad * self.medicamento.precio
 
     def __str__(self):
         return f"Detalle de {self.medicamento} para {self.atencion}"
@@ -106,8 +137,35 @@ class DetalleAtencion(models.Model):
         verbose_name_plural = "Detalles de Atención"
 
 
-# Modelo que representa un servicio adicional ofrecido durante una atención médica.
-# Puede incluir exámenes, procedimientos, o cualquier otro servicio.
+
+class Examen(models.Model):
+    tipo_examen = models.CharField(max_length=20, choices=EXAMEN_CHOICES, verbose_name="Tipo de Examen")
+    descripcion = models.TextField(verbose_name="Descripción")
+    precio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Precio")
+    
+class DetalleExamen(models.Model):
+    atencion = models.ForeignKey(
+        Atencion, 
+        on_delete=models.CASCADE, 
+        related_name='examenes_realizados'
+    )
+    examen = models.ForeignKey(
+        Examen, 
+        on_delete=models.PROTECT,
+        related_name='realizados'
+    )
+    resultado = models.TextField()
+    fecha_realizacion = models.DateTimeField(auto_now_add=True)
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Detalle de {self.examen} para {self.atencion}"
+
+    class Meta:
+        ordering = ['atencion']
+        verbose_name = "Detalle de Examen"
+        verbose_name_plural = "Detalles de Examen"
+
 class ServiciosAdicionales(models.Model):
     nombre_servicio = models.CharField(max_length=255, verbose_name="Nombre del Servicio")
     costo_servicio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo del Servicio")
@@ -122,32 +180,190 @@ class ServiciosAdicionales(models.Model):
         verbose_name = "Servicio Adicional"
         verbose_name_plural = "Servicios Adicionales"
 
+class ServicioAtencion(models.Model):
+    """Nuevo modelo para relacionar servicios con atenciones"""
+    atencion = models.ForeignKey(
+        Atencion, 
+        on_delete=models.CASCADE,
+        related_name='servicios_prestados'
+    )
+    servicio = models.ForeignKey(
+        ServiciosAdicionales,
+        on_delete=models.PROTECT,
+        related_name='prestaciones'
+    )
+    cantidad = models.PositiveIntegerField(default=1)
+    
+    @property
+    def subtotal(self):
+        return self.cantidad * self.servicio.costo_servicio
 
-# Modelo que representa los costos asociados a una atención médica,
-# incluyendo consulta, servicios adicionales (exámenes, procedimientos), y otros costos.
-class CostosAtencion(models.Model):
-    atencion = models.ForeignKey(Atencion, on_delete=models.PROTECT, verbose_name="Atención", related_name="costos_atencion")
-    total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total", default=0.00)
-    fecha_pago = models.DateTimeField(auto_now_add=True, verbose_name="Fecha Pago")
-    activo = models.BooleanField(default=True, verbose_name="Activo")
 
+
+
+
+class Factura(models.Model):
+    ESTADO_CHOICES = [
+        ('BORRADOR', 'Borrador'),
+        ('EMITIDA', 'Emitida'),
+        ('PAGADA', 'Pagada'),
+        ('ANULADA', 'Anulada')
+    ]
+    METODO_PAGO_CHOICES = [
+            ('EFECTIVO', 'Efectivo'),
+            ('PAYPAL', 'PayPal'),
+        ]
+
+    atencion = models.OneToOneField(
+        'Atencion', 
+        on_delete=models.PROTECT, 
+        related_name='factura'
+    )
+    numero_factura = models.CharField(max_length=20, unique=True)
+    fecha_emision = models.DateTimeField(auto_now_add=True)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    iva = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    estado = models.CharField(
+        max_length=20, 
+        choices=ESTADO_CHOICES, 
+        default='BORRADOR'
+    )
+    metodo_pago = models.CharField(
+        max_length=20, 
+        choices=METODO_PAGO_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name="Método de Pago"
+    )
+    fecha_pago = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de Pago"
+    )
+    referencia_pago = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="Referencia de Pago"
+    )
+
+    def registrar_pago(self, metodo, referencia=None):
+        """Registra el pago de la factura"""
+        if self.estado != 'BORRADOR':
+            raise ValueError("Solo se pueden pagar facturas en estado borrador")
+            
+        self.estado = 'PAGADA'
+        self.metodo_pago = metodo
+        self.fecha_pago = timezone.now()
+        if referencia:
+            self.referencia_pago = referencia
+        self.save()
+    def generar_detalles(self):
+        """Genera los detalles de la factura basados en la atención"""
+        # Limpiar detalles existentes
+        self.detalles.all().delete()
+        
+        # Agregar consulta médica
+        if self.atencion.valor_consulta > 0:
+            DetalleFactura.objects.create(
+                factura=self,
+                tipo='CONSULTA',
+                descripcion="Consulta médica",
+                cantidad=1,
+                precio_unitario=self.atencion.valor_consulta
+            )
+
+        # Agregar medicamentos
+        for detalle in self.atencion.medicamentos_recetados.all():
+            DetalleFactura.objects.create(
+                factura=self,
+                tipo='MEDICAMENTO',
+                descripcion=f"Medicamento: {detalle.medicamento.nombre}",
+                cantidad=detalle.cantidad,
+                precio_unitario=detalle.medicamento.precio
+            )
+
+        # Agregar exámenes
+        for examen in self.atencion.examenes_realizados.all():
+            DetalleFactura.objects.create(
+                factura=self,
+                tipo='EXAMEN',
+                descripcion=f"Examen: {examen.examen.tipo_examen}",
+                cantidad=1,
+                precio_unitario=examen.examen.precio
+            )
+
+        # Agregar servicios adicionales
+        for servicio in self.atencion.servicios_prestados.all():
+            DetalleFactura.objects.create(
+                factura=self,
+                tipo='SERVICIO',
+                descripcion=f"Servicio: {servicio.servicio.nombre_servicio}",
+                cantidad=servicio.cantidad,
+                precio_unitario=servicio.servicio.costo_servicio
+            )
+
+        self.calcular_totales()
+
+    def calcular_totales(self):
+        """Calcula los totales de la factura"""
+        self.subtotal = self.detalles.aggregate(
+            total=Sum('subtotal')
+        )['total'] or Decimal('0.00')
+        self.iva = self.subtotal * Decimal('0.12')
+        self.total = self.subtotal + self.iva
+        self.save()
+
+    def emitir(self):
+        """Emite la factura cambiando su estado"""
+        if self.estado == 'BORRADOR':
+            self.estado = 'EMITIDA'
+            self.save()
+
+    def anular(self):
+        """Anula la factura"""
+        if self.estado in ['EMITIDA', 'PAGADA']:
+            self.estado = 'ANULADA'
+            self.save()
+
+class DetalleFactura(models.Model):
+    TIPO_CHOICES = [
+        ('CONSULTA', 'Consulta'),
+        ('MEDICAMENTO', 'Medicamento'),
+        ('EXAMEN', 'Examen'),
+        ('SERVICIO', 'Servicio Adicional')
+    ]
+
+    factura = models.ForeignKey(
+        Factura, 
+        on_delete=models.CASCADE, 
+        related_name='detalles'
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    descripcion = models.CharField(max_length=255)
+    cantidad = models.PositiveIntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def save(self, *args, **kwargs):
+        self.subtotal = self.cantidad * self.precio_unitario
+        super().save(*args, **kwargs)
+        if not kwargs.get('skip_factura_update', False):
+            self.factura.calcular_totales()
+
+class Certificado(models.Model):
+    TIPO_CHOICES = [
+        ('MEDICO', 'Certificado Médico'),
+        ('REPOSO', 'Certificado de Reposo'),
+        ('DISCAPACIDAD', 'Certificado de Discapacidad')
+    ]
+
+    atencion = models.ForeignKey(Atencion, on_delete=models.PROTECT, verbose_name="Atención")
+    tipo_certificado = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name="Tipo de Certificado")
+    fecha_emision = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Emisión")
+    descripcion = models.TextField(verbose_name="Descripción")
+    archivo_pdf = models.FileField(upload_to='certificados/', verbose_name="Archivo PDF")
+    
     def __str__(self):
-        return f"{self.atencion} - Total: {self.total}"
-
-    class Meta:
-        ordering = ['-fecha_pago']
-        verbose_name = "Costo de Atención"
-        verbose_name_plural = "Costos de Atención"
-
-
-class CostoAtencionDetalle(models.Model):
-    costo_atencion = models.ForeignKey(CostosAtencion, on_delete=models.PROTECT, verbose_name="Costo Atención", related_name="costos_atenciones")
-    servicios_adicionales = models.ForeignKey(ServiciosAdicionales, on_delete=models.PROTECT, verbose_name="Servicios Adicionales", related_name="servicios_adicionales")
-    costo_servicio = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo del Servicio")
-
-    def __str__(self):
-        return f"{self.servicios_adicionales} Costo: {self.costo_servicio}"
-
-    class Meta:
-        verbose_name = "Costo detalle Atención"
-        verbose_name_plural = "Costos detalles Atención"
+        return f"{self.tipo_certificado} - {self.atencion.paciente}"
